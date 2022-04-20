@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple02\\Client\\ChatClient\\ChatClient\\ChatClient.csproj",
+      "projectUniqueName": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple04\\Client\\ChatClient\\ChatClient\\ChatClient.csproj",
       "projectName": "ChatClient",
-      "projectPath": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple02\\Client\\ChatClient\\ChatClient\\ChatClient.csproj",
+      "projectPath": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple04\\Client\\ChatClient\\ChatClient\\ChatClient.csproj",
       "packagesPath": "C:\\Users\\Michel\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple02\\Client\\ChatClient\\ChatClient\\obj\\",
+      "outputPath": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple04\\Client\\ChatClient\\ChatClient\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Michel\\AppData\\Roaming\\NuGet\\NuGet.Config",

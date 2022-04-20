@@ -15,12 +15,14 @@ namespace ChatServeur
         }
        
         // la méthonde Invoke prend en paramètre une méthode de type AddItemDelegate
-        private delegate void AddItemDelegate(string text);
+        private delegate void AddItemDelegate(MessageReseau leMessage);
         private AddItemDelegate m_newMessage;
         // dans la méthode init m_newMessage = new AddItemDelegate(this.AddItemToList);
         // dans la méthode recevoir lb_messages.Invoke(m_newMessage, new string[] { strMessage });
-        void AddItemToList(string element)
+        void AddItemToList(MessageReseau leMessage)
         {
+            string element = leMessage.IpEmetteur.ToString()
+                                + " -> " + leMessage.Texte;
             lb_messages.Items.Add(element);
             lb_nbmessages.Text = lb_messages.Items.Count.ToString() + " message(s) reçu(s)";
 
@@ -31,7 +33,7 @@ namespace ChatServeur
         private IPAddress? adrIpLocale;
         private Socket? sock;
         private IPEndPoint epRecepteur;
-        byte[]? message;
+        byte[]? messageBytes;
 
 
         private UInt16 portNum = 33000;
@@ -54,7 +56,7 @@ namespace ChatServeur
 
             m_newMessage = new AddItemDelegate(this.AddItemToList);
 
-            message = new byte[lgMessage];
+            messageBytes = new byte[lgMessage];
 
             // récupération de l'adresse IP
             adrIpLocale = getAdrIpLocaleV4();
@@ -75,7 +77,7 @@ namespace ChatServeur
             EndPoint epTemp = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
 
             // Réception des données de manière Asynchrone, cf. fonction "recevoir"
-            sock.BeginReceiveFrom(message, 0, lgMessage, SocketFlags.None, ref epTemp,
+            sock.BeginReceiveFrom(messageBytes, 0, lgMessage, SocketFlags.None, ref epTemp,
                                 new AsyncCallback(recevoir), null);
 
         }
@@ -89,19 +91,18 @@ namespace ChatServeur
             IPEndPoint epEmetteur = (IPEndPoint)epTemp;
 
             // Décodage du message
-            string strMessage;
-            strMessage = Encoding.Unicode.GetString(message, 0, message.Length);
+            MessageReseau leMessage = new MessageReseau(messageBytes);
 
             // Mise à jour de l'interface graphique
             // L'interface graphique ne peut être mise à jour
             //   que par le processus principal
             // Utilisation de la méthode Invoke afin de mettre à jour
             ///  l'interface graphique via le processus principal
-            lb_messages.Invoke(m_newMessage, new string[] { strMessage });
+            lb_messages.Invoke(m_newMessage, leMessage);
 
             // Réouverture du socket, attente d'un nouveau message
-            Array.Clear(message, 0, message.Length);
-            sock.BeginReceiveFrom(message, 0, lgMessage, SocketFlags.None, ref epTemp,
+            Array.Clear(messageBytes, 0, messageBytes.Length);
+            sock.BeginReceiveFrom(messageBytes, 0, lgMessage, SocketFlags.None, ref epTemp,
                                     new AsyncCallback(recevoir), null);
             //MessageBox.Show(epEmetteur.Address.ToString() + " -> " + strMessage);
         }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "nqY+DFT2qVnokfRXwcuPoy0+OfY+W2G48GgrlEPDQTxkknhX5rSzRBshR43T8pM3MGSSib6vsPcSd3g17kF0IQ==",
+  "dgSpecHash": "AKElpla3odfy8qivnmE0N8cxufePHgSQNAKlqxE8ZPUOxBNo2UJoRjDIhPDec4ZdbwkkMfm4PVNroQjBRtuGZw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple02\\Serveur\\ChatServeur\\ChatServeur\\ChatServeur.csproj",
+  "projectFilePath": "C:\\Users\\Michel\\source\\repos\\Chat\\Exemple04\\Serveur\\ChatServeur\\ChatServeur\\ChatServeur.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
