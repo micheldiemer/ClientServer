@@ -89,7 +89,6 @@
             this.Controls.Add(this.label1);
             this.Name = "Fm_client";
             this.Text = "Client 01";
-            this.Load += new System.EventHandler(this.Fm_client_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

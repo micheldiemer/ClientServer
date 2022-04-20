@@ -31,18 +31,20 @@ namespace ChatClient
         private void bt_envoyer_Click(object sender, EventArgs e)
         {
             byte[] message;
+            
+            // Création du socket
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint epEmetteur = new IPEndPoint(adrIpLocale, 0);
             sock.Bind(epEmetteur);
             IPEndPoint epRecepteur = new IPEndPoint(IPAddress.Parse(tb_ipDestinataire.Text), portNum);
+            
+            // Encodage du message en binaire
             message = Encoding.Unicode.GetBytes(tb_message.Text);
+            
+            // Envoi du message
             sock.SendTo(message, epRecepteur);
             sock.Close();
         }
 
-        private void Fm_client_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

@@ -55,6 +55,8 @@ namespace ChatServeur
             m_newMessage = new AddItemDelegate(this.AddItemToList);
 
             message = new byte[lgMessage];
+
+            // récupération de l'adresse IP
             adrIpLocale = getAdrIpLocaleV4();
             tb_port.Text = portNum.ToString();
             try
@@ -65,11 +67,14 @@ namespace ChatServeur
             {
                 tb_ipV4.Text = "Erreur " + e.Message;
             }
+
+            // Création du Socket
             sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             epRecepteur = new IPEndPoint(adrIpLocale, portNum);
             sock.Bind(epRecepteur);
             EndPoint epTemp = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
 
+            // Réception des données de manière Asynchrone, cf. fonction "recevoir"
             sock.BeginReceiveFrom(message, 0, lgMessage, SocketFlags.None, ref epTemp,
                                 new AsyncCallback(recevoir), null);
 
@@ -78,13 +83,23 @@ namespace ChatServeur
 
         private void recevoir(IAsyncResult AR)
         {
+            // Récuopération des informations et des données de l'émetteur
             EndPoint epTemp = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
             sock.EndReceiveFrom(AR, ref epTemp);
             IPEndPoint epEmetteur = (IPEndPoint)epTemp;
+
+            // Décodage du message
             string strMessage;
             strMessage = Encoding.Unicode.GetString(message, 0, message.Length);
+
+            // Mise à jour de l'interface graphique
+            // L'interface graphique ne peut être mise à jour
+            //   que par le processus principal
+            // Utilisation de la méthode Invoke afin de mettre à jour
+            ///  l'interface graphique via le processus principal
             lb_messages.Invoke(m_newMessage, new string[] { strMessage });
 
+            // Réouverture du socket, attente d'un nouveau message
             Array.Clear(message, 0, message.Length);
             sock.BeginReceiveFrom(message, 0, lgMessage, SocketFlags.None, ref epTemp,
                                     new AsyncCallback(recevoir), null);
