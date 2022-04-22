@@ -48,6 +48,7 @@ namespace ChatServeur
             clients = new Dictionary<IPAddress, string>();
             messageBytes = new byte[lgMessage];
             adrIpLocale = UtilIP.GetAdrIpLocaleV4();
+            tb_ipV4.Text = adrIpLocale.ToString();
             sockReception = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             epRecepteur = new IPEndPoint(adrIpLocale, portServeur);
             sockReception.Bind(epRecepteur);
@@ -100,8 +101,7 @@ namespace ChatServeur
                 case 'E':
                     string pseudo = clients[leMessage.IpEmetteur];
                     MessageChat messageRetransmis =
-                    new MessageChat('R', adrIpLocale, pseudo + " -> "
-                    + leMessage.Texte);
+                    new MessageChat('R', adrIpLocale, pseudo + " -> " + leMessage.Texte);
                     envoyerBroadcast(messageRetransmis);
                     break;
                 case 'D':
