@@ -97,7 +97,8 @@ namespace ChatClient
             EndPoint epTemp = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
             sockReception.EndReceiveFrom(AR, ref epTemp);
             MessageChat leMessage = new MessageChat(messageBytes);
-            lb_messages.Invoke(m_newMessage, leMessage);
+            if(leMessage.TypeMessage == 'R')
+                lb_messages.Invoke(m_newMessage, leMessage);
             Array.Clear(messageBytes, 0, messageBytes.Length);
             sockReception.BeginReceiveFrom(messageBytes, 0, lgMessage,
             SocketFlags.None, ref epTemp,

@@ -10,15 +10,15 @@ namespace ChatServeur
         public Fm_serveur()
         {
             InitializeComponent();
-            init();
+            initReception();
         }
        
         // la méthonde Invoke prend en paramètre une méthode de type AddItemDelegate
-        private delegate void AddItemDelegate(MessageReseau leMessage);
+        private delegate void AddItemDelegate(MessageChat leMessage);
         private AddItemDelegate m_newMessage;
         // dans la méthode init m_newMessage = new AddItemDelegate(this.AddItemToList);
         // dans la méthode recevoir lb_messages.Invoke(m_newMessage, new string[] { strMessage });
-        void AddItemToList(MessageReseau leMessage)
+        void AddItemToList(MessageChat leMessage)
         {
             string element = leMessage.IpEmetteur.ToString()
                                 + " -> " + leMessage.Texte;
@@ -28,67 +28,93 @@ namespace ChatServeur
         }
 
 
-        private int lgMessage = 40;
+        private static int lgMessage = 1000;
+        private static int portServeur = UtilIP.DEFAULT_PORT_SERVER;
+        private static int portClient = UtilIP.DEFAULT_PORT_CLIENT;
         private IPAddress adrIpLocale;
-        private Socket? sock;
+        private Socket sockReception;
         private IPEndPoint epRecepteur;
-        byte[]? messageBytes;
+        byte[] messageBytes;
+        Dictionary<IPAddress, string> clients;
 
 
-        
 
-        private void init()
+
+        private void initReception()
         {
 
             m_newMessage = new AddItemDelegate(this.AddItemToList);
 
+            clients = new Dictionary<IPAddress, string>();
             messageBytes = new byte[lgMessage];
-
-            // récupération de l'adresse IP
             adrIpLocale = UtilIP.GetAdrIpLocaleV4();
-            tb_port.Text = UtilIP.DEFAULT_PORT.ToString();
-            try
-            {
-                tb_ipV4.Text = adrIpLocale.ToString();
-            }
-            catch (SocketException e)
-            {
-                tb_ipV4.Text = "Erreur " + e.Message;
-            }
-
-            // Création du Socket
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            epRecepteur = new IPEndPoint( adrIpLocale, UtilIP.DEFAULT_PORT);
-            sock.Bind(epRecepteur);  
+            sockReception = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            epRecepteur = new IPEndPoint(adrIpLocale, portServeur);
+            sockReception.Bind(epRecepteur);
             EndPoint epTemp = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
-
-            // Réception des données de manière Asynchrone, cf. fonction "recevoir"
-            sock.BeginReceiveFrom(messageBytes, 0, lgMessage, SocketFlags.None, ref epTemp,
-                                new AsyncCallback(recevoir), null);
+            sockReception.BeginReceiveFrom(messageBytes, 0, lgMessage,
+                SocketFlags.None, ref epTemp, new AsyncCallback(recevoir), null);
 
         }
-        
+
+
+        private void envoyerBroadcast(MessageChat leMessage)
+        {
+            byte[] messageBroadcast;
+            Socket sockEmission = new Socket(AddressFamily.InterNetwork,
+                SocketType.Dgram,
+                ProtocolType.Udp);
+            sockEmission.SetSocketOption(SocketOptionLevel.Socket,
+            SocketOptionName.Broadcast, true);
+            IPEndPoint epEmetteur = new IPEndPoint(adrIpLocale, 0);
+                sockEmission.Bind(epEmetteur);
+            IPEndPoint epRecepteur = new IPEndPoint(IPAddress.Broadcast, portClient);
+            messageBroadcast = leMessage.GetInfos();
+            sockEmission.SendTo(messageBroadcast, epRecepteur);
+            sockEmission.Close();
+        }
+
 
         private void recevoir(IAsyncResult AR)
         {
             // Récuopération des informations et des données de l'émetteur
             EndPoint epTemp = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
-            sock.EndReceiveFrom(AR, ref epTemp);
+            sockReception.EndReceiveFrom(AR, ref epTemp);
             IPEndPoint epEmetteur = (IPEndPoint)epTemp;
 
             // Décodage du message
-            MessageReseau leMessage = new MessageReseau(messageBytes);
+            MessageChat leMessage = new MessageChat(messageBytes);
 
             // Mise à jour de l'interface graphique
             // L'interface graphique ne peut être mise à jour
             //   que par le processus principal
             // Utilisation de la méthode Invoke afin de mettre à jour
             ///  l'interface graphique via le processus principal
-            lb_messages.Invoke(m_newMessage, leMessage);
+
+            switch (leMessage.TypeMessage)
+            {
+                case 'C':
+                    clients.Add(leMessage.IpEmetteur, leMessage.Texte);
+                    lb_messages.Invoke(m_newMessage, leMessage);
+                    break;
+                case 'E':
+                    string pseudo = clients[leMessage.IpEmetteur];
+                    MessageChat messageRetransmis =
+                    new MessageChat('R', adrIpLocale, pseudo + " -> "
+                    + leMessage.Texte);
+                    envoyerBroadcast(messageRetransmis);
+                    break;
+                case 'D':
+                    clients.Remove(leMessage.IpEmetteur);
+                    break;
+            }
+            
+
+
 
             // Réouverture du socket, attente d'un nouveau message
             Array.Clear(messageBytes, 0, messageBytes.Length);
-            sock.BeginReceiveFrom(messageBytes, 0, lgMessage, SocketFlags.None, ref epTemp,
+            sockReception.BeginReceiveFrom(messageBytes, 0, lgMessage, SocketFlags.None, ref epTemp,
                                     new AsyncCallback(recevoir), null);
             //MessageBox.Show(epEmetteur.Address.ToString() + " -> " + strMessage);
         }
