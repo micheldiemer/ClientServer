@@ -7,7 +7,8 @@
     public class UtilIP
     {
 
-        public const UInt16 DEFAULT_PORT = 33000;
+        public const UInt16 DEFAULT_PORT_SERVER = 33000;
+        public const UInt16 DEFAULT_PORT_CLIENT = 33001;
         public static IPAddress GetAdrIpLocaleV4()
         {
             string hote = Dns.GetHostName();
