@@ -117,7 +117,8 @@ namespace ChatServeur
                     string pseudo = clients[leMessage.IpEmetteur];
                     MessageChat messageRetransmis =
                     new MessageChat('R', adrIpLocale, pseudo + " -> " + leMessage.Texte);
-                    EnvoyerBroadcast(messageRetransmis);
+                    //EnvoyerBroadcast(messageRetransmis);
+                    EnvoyerMulticast(messageRetransmis);
                     break;
                 case 'D':
                     clients.Remove(leMessage.IpEmetteur);
